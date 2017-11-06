@@ -5,6 +5,8 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
 
 /*
 const char* ssid = "........";
@@ -18,6 +20,11 @@ const int adc_min_delta = 5; // only report changes if ADC differs by this amoun
 const int adc_poll_interval = 1000; // milliseconds to check after
 const int udp_port_adc = 8267; // of broker IP address above, for UDP datagrams on ADC readings
 
+#define SEALEVELPRESSURE_HPA (1013.25)
+
+Adafruit_BME280 bme; // I2C
+
+#define BME280_I2C_ADDRESS 0x76 // found with Bus Pirate scan; Adafruit default is 0x77 but mine is 0x76
 
 ESP8266WebServer server(80);
 
@@ -177,6 +184,14 @@ void setup(void){
     pinMode(input_gpio[i].pin, INPUT_PULLUP);
     Serial.printf("Configuring input: pin #%d = %s\n", input_gpio[i].pin, input_gpio[i].name);
   }
+
+  // Setup BME280 sensor
+  if (!bme.begin(BME280_I2C_ADDRESS)) {
+    Serial.println("Could not find a valid BME280 sensor, check wiring!");
+  } else {
+    delay(100); // let sensor boot up
+    Serial.println("BME280 sensor initialized");
+  }
 }
 
 static WiFiUDP udp;
@@ -211,6 +226,7 @@ void loop(void){
   // Analog input
   unsigned long duration = millis() - analog_last_read_at;
   if (duration > adc_poll_interval) {
+    // A0 input
     int analog_value = analogRead(A0);
     int delta = abs(analog_value - old_analog_value);
     if (delta > adc_min_delta) {
@@ -222,6 +238,27 @@ void loop(void){
     }
     old_analog_value = analog_value;
     analog_last_read_at = millis();
+
+    // BME280
+    // TODO: send packets
+    Serial.print("Temperature = ");
+    Serial.print(bme.readTemperature());
+    Serial.println(" *C");
+
+    Serial.print("Pressure = ");
+
+    Serial.print(bme.readPressure() / 100.0F);
+    Serial.println(" hPa");
+
+    Serial.print("Approx. Altitude = ");
+    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
+    Serial.println(" m");
+
+    Serial.print("Humidity = ");
+    Serial.print(bme.readHumidity());
+    Serial.println(" %");
+
+    Serial.println();
   }
 }
 
