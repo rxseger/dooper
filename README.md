@@ -12,8 +12,8 @@ server running:
 ## Wiring
 
 * V3, GND
-* D3 to BME280 SDA (I2C data)
-* D2 to BME280 SCL (I2C clock
+* D2 to BME280 SDA (I2C data)
+* D1 to BME280 SCL (I2C clock
 
 ## See also
 * [cooper](https://github.com/rxseger/cooper/)

@@ -1,4 +1,5 @@
-// d1sensor - code for running on the WeMos D1 mini
+// dooper - my code for running on the WeMos D1 mini
+// based on cooper https://github.com/rxseger/cooper/
 
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
@@ -48,7 +49,16 @@ struct {
   char off_bytes[2];
   int last_state;
 } input_gpio[] = {
-  // TODO
+  // TODO: use for something useful
+  { D0, "D0", { 0x10, 0xff }, { 0x10, 0x00 } },
+  // D1 - used by I2C clock
+  // D2 - used by I2C data
+  { D3, "D3", { 0x13, 0xff }, { 0x13, 0x00 } },
+  { D4, "D4", { 0x14, 0xff }, { 0x14, 0x00 } },
+  { D5, "D5", { 0x15, 0xff }, { 0x15, 0x00 } },
+  { D6, "D6", { 0x16, 0xff }, { 0x16, 0x00 } },
+  { D7, "D7", { 0x17, 0xff }, { 0x17, 0x00 } },
+  { D8, "D8", { 0x18, 0xff }, { 0x18, 0x00 } },
 };
 
 static float temperature_c  = -1;
