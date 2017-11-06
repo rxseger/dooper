@@ -50,12 +50,25 @@ struct {
   // TODO
 };
 
+static float temperature_c  = -1;
+static float pressure_hPa = -1;
+static float altitude_m = -1;
+static float humidity_percent = -1;
+
+void refreshBme() {
+  temperature_c = bme.readTemperature();
+  pressure_hPa = bme.readPressure() / 100.0F;
+  altitude_m = bme.readAltitude(SEALEVELPRESSURE_HPA);
+  humidity_percent = bme.readHumidity();
+}
+
 void handleRoot() {
   digitalWrite(led, 0);
   String html = "<html>"
 "<head>"
 "<title>ESP8266 D1</title>"
 "</head>"
+"<meta charset=\"UTF-8\">"
 "<body>"
 "<h1>ESP8266 D1</h1>"
 "<table>"
@@ -83,6 +96,22 @@ void handleRoot() {
     html += "</tr>";
   }
 
+  refreshBme();
+  html += "<tr><td>Temperature</td>";
+  html += "<td>" + String(temperature_c) + "</td>";
+  html += "<td>ºC</td></tr>";
+
+  html += "<tr><td>Pressure</td>";
+  html += "<td>" + String(pressure_hPa) + "</td>";
+  html += "<td>hPA</td></tr>";
+
+  html += "<tr><td>Altitude</td>";
+  html += "<td>" + String(altitude_m) + "</td>";
+  html += "<td>m</td></tr>";
+
+  html += "<tr><td>Humidity</td>";
+  html += "<td>" + String(humidity_percent) + "</td>";
+  html += "<td>%</td></tr>";
 
   html += "</table>"
 "</body>"
@@ -240,22 +269,22 @@ void loop(void){
     analog_last_read_at = millis();
 
     // BME280
+    refreshBme();
     // TODO: send packets
     Serial.print("Temperature = ");
-    Serial.print(bme.readTemperature());
+    Serial.print(temperature_c);
     Serial.println(" *C");
 
     Serial.print("Pressure = ");
-
-    Serial.print(bme.readPressure() / 100.0F);
+    Serial.print(pressure_hPa);
     Serial.println(" hPa");
 
     Serial.print("Approx. Altitude = ");
-    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
+    Serial.print(altitude_m);
     Serial.println(" m");
 
     Serial.print("Humidity = ");
-    Serial.print(bme.readHumidity());
+    Serial.print(humidity_percent);
     Serial.println(" %");
 
     Serial.println();
