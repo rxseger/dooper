@@ -19,6 +19,7 @@ const uint16_t udp_port_gpio = 8266; // of broker IP address above, for UDP data
 const int adc_min_delta = 5; // only report changes if ADC differs by this amount from last poll value
 const int adc_poll_interval = 1000; // milliseconds to check after
 const int udp_port_adc = 8267; // of broker IP address above, for UDP datagrams on ADC readings
+const int udp_port_bme = 8268; // of broker IP address above, for UDP datagrams on BME280 readings
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
@@ -270,24 +271,14 @@ void loop(void){
 
     // BME280
     refreshBme();
-    // TODO: send packets
-    Serial.print("Temperature = ");
-    Serial.print(temperature_c);
-    Serial.println(" *C");
-
-    Serial.print("Pressure = ");
-    Serial.print(pressure_hPa);
-    Serial.println(" hPa");
-
-    Serial.print("Approx. Altitude = ");
-    Serial.print(altitude_m);
-    Serial.println(" m");
-
-    Serial.print("Humidity = ");
-    Serial.print(humidity_percent);
-    Serial.println(" %");
-
-    Serial.println();
+    String json = "{\"temperature_c\": " + String(temperature_c) + ", " +
+      "\"pressure_hPa\": " + String(pressure_hPa) + ", " +
+      "\"altitude_m\": " + String(altitude_m) + ", " +
+      "\"humidity_percent\": " + String(humidity_percent) + "}";
+     Serial.println(json);
+     udp.beginPacket(broker, udp_port_bme);
+     udp.write(json.c_str(), json.length());    
+     udp.endPacket();
   }
 }
 
